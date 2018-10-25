@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/** FileInfo.java:解析文件、文件夹路径下的所有文件 ----- 2018-10-24 下午4:12:08 wangzhongyuan */
+/** FileInfo.java:解析文件、文件夹路径下的所有文件 ----- 2018-10-24 下午4:12:08 scimence */
 public class FileInfo
 {
 	/** 获取paths路径下所有文件信息 */

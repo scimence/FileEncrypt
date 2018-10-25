@@ -6,37 +6,75 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
-
-/** Encrypt.java: 对字符串或文件进行自定义加解密。 适用于较小文件的加解密，载入内存操作;
- * 加密文件：EncryptFile(filePath);
- * 解密文件：DecryptFile(filePath);
+/** Encrypt.java: 对字符串或文件进行自定义加解密。 适用于较小文件的加解密，载入内存操作; 
+ * 加密文件：EncryptFile(filePath, int Password)
+ * 解密文件：DecryptFile(filePath, int Password)
  * 加密字符串：Encryption(String str, int change)
- * 解密字符串：Encryption(String str, int -change)
- * 加密byte数组：Encryption(byte[] bytes, int change)
- * 解密byte数组：Encryption(byte[] bytes, int -change)
- * 
- * ----- 2018-10-22 下午5:50:35 wangzhongyuan */
-
+ * 解密字符串：Encryption(String str, int -change) 
+ * 加密byte数组：Encryption(byte[] bytes, int change) 
+ * 解密byte数组：Encryption(byte[] bytes, int -change) 
+ * ----- 2018-10-22 下午5:50:35 scimence */
 public class Encrypt
 {
+	public static int Password = 65537;
+	
 	public static void main(String[] args)
 	{
-		String[] files = FileInfo.getSubFiles(args); 		// 获取args对应的所有目录下的文件列表
+		args = AnalyseArg(args);	// 解析参数信息
+		
+		String[] files = FileInfo.getSubFiles(args); // 获取args对应的所有目录下的文件列表
 		for (String filePath : files)
 		{
-			boolean isEncrypt = isEncryptFile(filePath);	// 判断是否为加密文件
+			boolean isEncrypt = isEncryptFile(filePath); // 判断是否为加密文件
 			if (!isEncrypt)
 			{
 				System.out.println("加密文件，" + filePath);
-				EncryptFile(filePath);
+				EncryptFile(filePath, Password);
 			}
 			else
 			{
 				System.out.println("解密文件，" + filePath);
-				DecryptFile(filePath);
+				DecryptFile(filePath, Password);
 			}
 		}
+	}
+	
+//	/** 解析参数信息 */
+//	private static String[] AnalyseArg(String[] args)
+//	{
+//		for (String arg : args)
+//		{
+//			System.out.println("参数：" + arg.toString());
+//		}
+//		return args;
+//	}
+	
+	/** 解析参数信息 */
+	private static String[] AnalyseArg(String[] args)
+	{
+		if (args == null || args.length == 0) return args;
+		
+		ArrayList<String> argList = new ArrayList<String>();
+		for (Object arg0 : args)
+		{
+			String arg = arg0.toString();
+			if (arg.startsWith("PSW:"))
+			{
+				try
+				{
+					Password = Integer.parseInt(arg.substring(4));
+				}
+				catch (Exception ex)
+				{
+					System.out.print(ex.toString());
+				}
+			}
+			else argList.add(arg);
+		}
+		
+		return FileInfo.List2Array(argList);
 	}
 	
 	/** 对字符串数据进行加解密， change加密、 -chage解密 */
@@ -122,20 +160,20 @@ public class Encrypt
 	}
 	
 	/** 对文件进行加密 */
-	public static void EncryptFile(String filePath)
+	public static void EncryptFile(String filePath, int Password)
 	{
 		boolean isEncrypt = isEncryptFile(filePath);
 		if (!isEncrypt)
 		{
 			byte[] bytes = FileToBytes(filePath);	// 读取文件数据
-			Encryption(bytes, 65537);				// 加密
+			Encryption(bytes, Password);				// 加密
 			String data = "DATA$" + toHex(bytes);	// 添加前缀 + 转化为字符串
 			write(filePath, data);					// 输出文件
 		}
 	}
 	
 	/** 对文件进行解密 */
-	public static void DecryptFile(String filePath)
+	public static void DecryptFile(String filePath, int Password)
 	{
 		boolean isEncrypt = isEncryptFile(filePath);
 		if (isEncrypt)
@@ -144,7 +182,7 @@ public class Encrypt
 			String data = new String(bytes).substring(5);	// 转化为字符串，获取数据串
 			bytes = toBytes(data);							// 还原为原有数据
 			
-			Encryption(bytes, -65537);						// 解密
+			Encryption(bytes, -Password);					// 解密
 			write(filePath, bytes);							// 输出数据
 		}
 	}
